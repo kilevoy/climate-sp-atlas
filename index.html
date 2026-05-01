@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Климатические данные | СП 20, СП 131, СП 22</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0b0d10;
+    color: #d4d8e0;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
+  header { text-align: center; margin-bottom: 30px; }
+  h1 { font-size: 1.8rem; color: #4fc3f7; font-weight: 600; }
+  .subtitle { color: #6b7380; font-size: 0.9rem; margin-top: 6px; }
+
+  .search-wrap { position: relative; max-width: 500px; margin: 0 auto 30px; }
+  #search { width: 100%; padding: 14px 18px; border: 1px solid #2a2e3a; border-radius: 10px; background: #14171f; color: #e0e6f0; font-size: 1rem; }
+  #search:focus { outline: none; border-color: #4fc3f7; }
+  #suggestions {
+    position: absolute; top: 100%; left: 0; right: 0; max-height: 260px; overflow-y: auto;
+    background: #1a1d26; border: 1px solid #2a2e3a; border-radius: 0 0 10px 10px; z-index: 10;
+    display: none;
+  }
+  .sug-item { padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #242836; }
+  .sug-item:hover, .sug-item.active { background: #242836; }
+  .sug-name { color: #e0e6f0; font-weight: 500; }
+  .sug-region { color: #6b7380; font-size: 0.8rem; }
+
+  .card { background: #14171f; border: 1px solid #1e222d; border-radius: 14px; overflow: hidden; }
+  .card-header { padding: 22px 24px; border-bottom: 1px solid #1e222d; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .city-name { font-size: 1.4rem; font-weight: 600; color: #fff; }
+  .city-meta { color: #6b7380; font-size: 0.85rem; margin-top: 4px; }
+  .status-badge {
+    display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .status-verified { background: rgba(76, 175, 80, 0.15); color: #4caf50; }
+  .status-partial { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
+  .status-requires_verification { background: rgba(244, 67, 54, 0.15); color: #f44336; }
+
+  .tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid #1e222d; background: #0f1218; overflow-x: auto; }
+  .tab { padding: 12px 16px; cursor: pointer; font-size: 0.88rem; color: #6b7380; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tab:hover { color: #a0aab8; }
+  .tab.active { color: #4fc3f7; border-color: #4fc3f7; }
+
+  .tab-content { display: none; padding: 22px 24px; }
+  .tab-content.active { display: block; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #4fc3f7; margin: 20px 0 12px; font-weight: 600; }
+  .section-title:first-child { margin-top: 0; }
+
+  .param-card { background: #0f1218; border: 1px solid #1e222d; border-radius: 10px; padding: 16px; }
+  .param-label { color: #6b7380; font-size: 0.82rem; margin-bottom: 6px; }
+  .param-value { font-size: 1.25rem; font-weight: 600; color: #fff; }
+  .param-unit { color: #6b7380; font-size: 0.85rem; margin-left: 4px; }
+  .param-source { color: #4a5568; font-size: 0.72rem; margin-top: 8px; word-break: break-all; }
+
+  .param-sm .param-value { font-size: 1.05rem; }
+
+  .comment-box { background: #0f1218; border: 1px solid #1e222d; border-radius: 10px; padding: 14px; color: #8b95a8; font-size: 0.9rem; line-height: 1.6; }
+  .chart-wrap { background: #0f1218; border: 1px solid #1e222d; border-radius: 10px; padding: 16px; height: 260px; }
+  .empty { text-align: center; color: #4a5568; padding: 60px 20px; }
+
+  .terrain-pill { display: inline-block; padding: 3px 10px; border-radius: 6px; background: #1e222d; margin: 2px; font-size: 0.8rem; color: #a0aab8; }
+  .terrain-pill.active { background: rgba(79, 195, 247, 0.12); color: #4fc3f7; }
+
+  @media (max-width: 600px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+    h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Климатические данные</h1>
+    <div class="subtitle">СП 20.13330.2016 · СП 131.13330 · СП 22.13330 · СП 14.13330</div>
+  </header>
+
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Введите город (например: Москва, Челябинск)..." autocomplete="off">
+    <div id="suggestions"></div>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<script>
+const API = 'settlements-climate.json';
+let data = [];
+let current = null;
+
+async function load() {
+  try {
+    const res = await fetch(API);
+    data = await res.json();
+  } catch(e) { alert('Ошибка загрузки данных'); }
+}
+
+const search = document.getElementById('search');
+const sug = document.getElementById('suggestions');
+const content = document.getElementById('content');
+
+search.addEventListener('input', () => {
+  const q = search.value.trim().toLowerCase();
+  if (q.length < 2) { sug.style.display='none'; return; }
+  const matches = data.filter(d => d.settlement.toLowerCase().includes(q) || d.region.toLowerCase().includes(q)).slice(0,8);
+  if (!matches.length) { sug.style.display='none'; return; }
+  sug.innerHTML = matches.map((m,i) =>
+    `<div class="sug-item ${i===0?'active':''}" data-idx="${data.indexOf(m)}">
+      <div class="sug-name">${esc(m.settlement)}</div>
+      <div class="sug-region">${esc(m.region)} · ${esc(m.settlementType)}</div>
+    </div>`).join('');
+  sug.style.display='block';
+  document.querySelectorAll('.sug-item').forEach(el => el.addEventListener('click', () => selectCity(parseInt(el.dataset.idx))));
+});
+
+search.addEventListener('keydown', e => {
+  const items = document.querySelectorAll('.sug-item');
+  let active = [...items].findIndex(x => x.classList.contains('active'));
+  if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(active+1, items.length-1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(active-1, 0); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (items[active]) selectCity(parseInt(items[active].dataset.idx)); }
+  items.forEach(x => x.classList.remove('active'));
+  if (items[active]) items[active].classList.add('active');
+});
+
+document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) sug.style.display='none'; });
+
+function selectCity(idx) {
+  current = data[idx];
+  search.value = current.settlement;
+  sug.style.display='none';
+  renderCity(current);
+}
+
+function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+function statusClass(s) {
+  if (s==='verified') return 'status-verified';
+  if (s==='partial') return 'status-partial';
+  return 'status-requires_verification';
+}
+
+function pcard(label, value, unit, source, extraClass='') {
+  return `<div class="param-card ${extraClass}">
+    <div class="param-label">${esc(label)}</div>
+    <div class="param-value">${value===null||value===undefined?'—':esc(String(value))}${unit?`<span class="param-unit">${esc(unit)}</span>`:''}</div>
+    ${source?`<div class="param-source">${esc(source)}</div>`:''}
+  </div>`;
+}
+
+function section(title) { return `<div class="section-title">${esc(title)}</div>`; }
+
+function renderCity(d) {
+  const tabs = [
+    {id:'loads', label:'Нагрузки'},
+    {id:'cold', label:'Холодный период'},
+    {id:'warm', label:'Тёплый период'},
+    {id:'frost', label:'Промерзание'},
+    {id:'chart', label:'График температур'}
+  ];
+
+  let html = `<div class="card">
+    <div class="card-header">
+      <div>
+        <div class="city-name">${esc(d.settlement)}</div>
+        <div class="city-meta">${esc(d.region)} · ${esc(d.settlementType)} · id: ${esc(d.id)}</div>
+      </div>
+      <div>
+        <span class="status-badge ${statusClass(d.dataStatus)}">${esc(d.dataStatus)}</span>
+      </div>
+    </div>`;
+
+  html += `<div class="tabs">${tabs.map((t,i) => `<div class="tab ${i===0?'active':''}" data-tab="${t.id}">${esc(t.label)}</div>`).join('')}</div>`;
+
+  // Tab: loads
+  html += `<div class="tab-content active" data-tab="loads">
+    ${section('Снеговая нагрузка (СП 20.13330.2016, карта 1)')}
+    <div class="grid-2">${d.snow ? pcard('Снеговой район', d.snow.region, '', d.snow.source) + pcard('Нормативное значение Sg', d.snow.sgKpa, 'кПа', d.snow.source) : '<div class="empty">Нет данных</div>'}</div>
+
+    ${section('Ветровая нагрузка (СП 20.13330.2016, карта 3)')}
+    <div class="grid-2">${d.wind ? pcard('Ветровой район', d.wind.region, '', d.wind.source) + pcard('Нормативное значение w₀', d.wind.w0Kpa, 'кПа', d.wind.source) : '<div class="empty">Нет данных</div>'}</div>
+
+    ${section('Гололёдная нагрузка (СП 20.13330.2016, карта 4)')}
+    <div class="grid-2">${d.ice ? pcard('Гололёдный район', d.ice.region, '', d.ice.source) + pcard('Толщина гололёда b при h=10 м', d.ice.iceThicknessMm, 'мм', d.ice.source) : '<div class="empty">Нет данных</div>'}</div>
+
+    ${section('Сейсмичность (СП 14.13330, ОСР-2015)')}
+    <div class="grid-2">${d.seismic ? pcard('Баллы сейсмичности (карта A)', d.seismic.points, 'баллов', d.seismic.source) : '<div class="empty">Нет данных</div>'}</div>
+
+    ${section('Тип местности (СП 20.13330.2016, табл. 11.2)')}
+    <div class="grid-2"><div class="param-card"><div class="param-label">Допустимые типы</div><div>${(d.terrain?.allowedTypes||[]).map(t=>`<span class="terrain-pill">${esc(t)}</span>`).join('')||'—'}</div></div></div>
+
+    ${d.comment ? section('Комментарий') + `<div class="comment-box">${esc(d.comment)}</div>` : ''}
+  </div>`;
+
+  // Tab: cold
+  const cp = d.coldPeriod;
+  html += `<div class="tab-content" data-tab="cold">
+    ${cp ? `
+    ${section('Температуры, °C')}
+    <div class="grid-3">
+      ${pcard('Т холодн. суток, обесп. 0.98', cp.tempColdestDay098, '°C')}
+      ${pcard('Т холодн. суток, обесп. 0.92', cp.tempColdestDay092, '°C')}
+      ${pcard('Т холодн. 5-дневки, обесп. 0.98', cp.tempColdest5days098, '°C')}
+      ${pcard('Т холодн. 5-дневки, обесп. 0.92', cp.tempColdest5days092, '°C')}
+      ${pcard('Т с обеспеч. 0.94', cp.temp094, '°C')}
+      ${pcard('Абсолютный минимум', cp.absMin, '°C')}
+      ${pcard('Средняя сут. амплитуда', cp.dailyAmplitude, '°C')}
+    </div>
+    ${section('Периоды и средние температуры')}
+    <div class="grid-3">
+      ${pcard('Продолж. при Т ≤ 0 °C', cp.durationLe0, 'сут', '', 'param-sm')} ${pcard('Средняя Т при Т ≤ 0 °C', cp.meanLe0, '°C', '', 'param-sm')}
+      ${pcard('Отопит. период (Т ≤ 8 °C)', cp.durationLe8, 'сут', '', 'param-sm')} ${pcard('Средняя Т отоп. периода', cp.meanLe8, '°C', '', 'param-sm')}
+      ${pcard('Период при Т ≤ 10 °C', cp.durationLe10, 'сут', '', 'param-sm')} ${pcard('Средняя Т при Т ≤ 10 °C', cp.meanLe10, '°C', '', 'param-sm')}
+    </div>
+    ${section('Влажность, ветер, осадки')}
+    <div class="grid-3">
+      ${pcard('Влажность холодн. мес.', cp.humidityCold, '%', '', 'param-sm')}
+      ${pcard('Влажность в 15:00', cp.humidityCold15, '%', '', 'param-sm')}
+      ${pcard('Осадки ноябрь—март', cp.precipNovMar, 'мм', '', 'param-sm')}
+      ${pcard('Преобл. ветер дек—фев', cp.prevailingWindDecFeb, '', '', 'param-sm')}
+      ${pcard('Макс. скорость ветра (янв)', cp.maxWindJan, 'м/с', '', 'param-sm')}
+      ${pcard('Средняя скорость при Т ≤ 8 °C', cp.meanWindLe8, 'м/с', '', 'param-sm')}
+    </div>
+    <div class="param-source" style="padding:10px 0 0">Источник: ${esc(cp.source||'—')}</div>
+    ` : '<div class="empty">Для этого города нет данных холодного периода</div>'}
+  </div>`;
+
+  // Tab: warm
+  const wp = d.warmPeriod;
+  html += `<div class="tab-content" data-tab="warm">
+    ${wp ? `
+    ${section('Температуры и давление')}
+    <div class="grid-3">
+      ${pcard('Барометрическое давление', wp.barometric, 'гПа')}
+      ${pcard('Т тёпл. мес., обесп. 0.95', wp.temp095, '°C')}
+      ${pcard('Т тёпл. мес., обесп. 0.99', wp.temp099, '°C')}
+      ${pcard('Средняя макс. Т тёпл. мес.', wp.meanMaxTempWarmMonth, '°C')}
+      ${pcard('Абсолютный максимум', wp.absMax, '°C')}
+      ${pcard('Средняя сут. амплитуда', wp.dailyAmplitude, '°C')}
+    </div>
+    ${section('Влажность, осадки, ветер')}
+    <div class="grid-3">
+      ${pcard('Влажность тёпл. мес.', wp.humidityWarm, '%', '', 'param-sm')}
+      ${pcard('Влажность в 15:00', wp.humidityWarm15, '%', '', 'param-sm')}
+      ${pcard('Осадки апрель—октябрь', wp.precipAprOct, 'мм', '', 'param-sm')}
+      ${pcard('Макс. суточные осадки', wp.dailyMaxPrecip, 'мм', '', 'param-sm')}
+      ${pcard('Преобл. ветер июнь—авг', wp.prevailingWindJunAug, '', '', 'param-sm')}
+      ${pcard('Мин. скорость ветра (июль)', wp.minWindJul, 'м/с', '', 'param-sm')}
+    </div>
+    <div class="param-source" style="padding:10px 0 0">Источник: ${esc(wp.source||'—')}</div>
+    ` : '<div class="empty">Для этого города нет данных тёплого периода</div>'}
+  </div>`;
+
+  // Tab: frost
+  const fr = d.frostDepth;
+  html += `<div class="tab-content" data-tab="frost">
+    ${fr ? `
+    ${section('Глубина сезонного промерзания, м (СП 22.13330)')}
+    <div class="grid-2">
+      ${pcard('Суглинки и глины', fr.loamy, 'м')}
+      ${pcard('Супеси, пески мелкие/пылеватые', fr.sandyFine, 'м')}
+      ${pcard('Пески крупные и средней крупности', fr.sandyCoarse, 'м')}
+      ${pcard('Крупнообломочные грунты', fr.coarseFragmental, 'м')}
+    </div>
+    <div class="param-source" style="padding:10px 0 0">Источник: ${esc(fr.source||'—')}</div>
+    ` : '<div class="empty">Для этого города нет данных по глубине промерзания</div>'}
+  </div>`;
+
+  // Tab: chart
+  const mt = d.monthlyTemps;
+  html += `<div class="tab-content" data-tab="chart">
+    ${mt && mt.byMonth ? `
+    <div class="grid-2" style="align-items:start">
+      <div>
+        ${section('Среднемесячные температуры, °C')}
+        <div class="grid-3">
+          ${mt.byMonth.map((t,i)=>pcard(['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'][i], t, '°C', '', 'param-sm')).join('')}
+        </div>
+        ${pcard('Среднегодовая температура', mt.yearly, '°C')}
+      </div>
+      <div class="chart-wrap">
+        <canvas id="tempChart" width="400" height="220"></canvas>
+      </div>
+    </div>
+    ` : '<div class="empty">Для этого города нет среднемесячных температур</div>'}
+  </div>`;
+
+  html += '</div>';
+  content.innerHTML = html;
+
+  // Tabs logic
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.querySelector(`.tab-content[data-tab="${t.dataset.tab}"]`).classList.add('active');
+      if (t.dataset.tab==='chart' && mt && mt.byMonth) drawChart(mt.byMonth);
+    });
+  });
+
+  if (mt && mt.byMonth) setTimeout(() => drawChart(mt.byMonth), 50);
+}
+
+function drawChart(data) {
+  const cvs = document.getElementById('tempChart');
+  if (!cvs) return;
+  const ctx = cvs.getContext('2d');
+  const dpr = window.devicePixelRatio||1;
+  const W = cvs.clientWidth, H = cvs.clientHeight;
+  cvs.width = W*dpr; cvs.height = H*dpr;
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+
+  const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  const pad = {top:20,right:15,bottom:30,left:35};
+  const w = W-pad.left-pad.right, h = H-pad.top-pad.bottom;
+  const min = Math.min(...data)-3, max = Math.max(...data)+3;
+  const range = max-min;
+
+  // grid
+  ctx.strokeStyle='#1e222d'; ctx.lineWidth=1;
+  for (let i=0;i<=5;i++) {
+    const y = pad.top+h*(i/5);
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+w,y); ctx.stroke();
+    ctx.fillStyle='#4a5568'; ctx.font='11px sans-serif'; ctx.textAlign='right';
+    ctx.fillText((max-range*(i/5)).toFixed(1), pad.left-6, y+4);
+  }
+
+  // line
+  const step = w/11;
+  ctx.strokeStyle='#4fc3f7'; ctx.lineWidth=2; ctx.lineJoin='round'; ctx.lineCap='round';
+  ctx.beginPath();
+  data.forEach((v,i)=> {
+    const x = pad.left+i*step;
+    const y = pad.top+h-(v-min)/range*h;
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // fill
+  ctx.beginPath();
+  data.forEach((v,i)=> {
+    const x = pad.left+i*step; const y = pad.top+h-(v-min)/range*h;
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.lineTo(pad.left+w, pad.top+h); ctx.lineTo(pad.left, pad.top+h); ctx.closePath();
+  ctx.fillStyle='rgba(79,195,247,0.08)'; ctx.fill();
+
+  // points
+  data.forEach((v,i)=> {
+    const x = pad.left+i*step; const y = pad.top+h-(v-min)/range*h;
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle='#4fc3f7'; ctx.fill();
+  });
+
+  // labels
+  ctx.fillStyle='#6b7380'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+  data.forEach((v,i)=> {
+    ctx.fillText(months[i], pad.left+i*step, H-8);
+  });
+}
+
+load();
+</script>
+</body>
+</html>
