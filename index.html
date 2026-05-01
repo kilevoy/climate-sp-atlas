@@ -22,11 +22,12 @@
   #search { width: 100%; padding: 14px 18px; border: 1px solid #2a2e3a; border-radius: 10px; background: #14171f; color: #e0e6f0; font-size: 1rem; }
   #search:focus { outline: none; border-color: #4fc3f7; }
   #suggestions {
-    position: absolute; top: 100%; left: 0; right: 0; max-height: 260px; overflow-y: auto;
-    background: #1a1d26; border: 1px solid #2a2e3a; border-radius: 0 0 10px 10px; z-index: 10;
-    display: none;
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0; max-height: 260px; overflow-y: auto;
+    background: #1a1d26; border: 1px solid #2a2e3a; border-radius: 10px; z-index: 10;
+    display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   }
   .sug-item { padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #242836; }
+  .sug-item:last-child { border-bottom: none; }
   .sug-item:hover, .sug-item.active { background: #242836; }
   .sug-name { color: #e0e6f0; font-weight: 500; }
   .sug-region { color: #6b7380; font-size: 0.8rem; }
@@ -43,7 +44,7 @@
   .status-requires_verification { background: rgba(244, 67, 54, 0.15); color: #f44336; }
 
   .tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid #1e222d; background: #0f1218; overflow-x: auto; }
-  .tab { padding: 12px 16px; cursor: pointer; font-size: 0.88rem; color: #6b7380; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tab { padding: 12px 16px; cursor: pointer; font-size: 0.88rem; color: #6b7380; border-bottom: 2px solid transparent; white-space: nowrap; transition: color .2s; }
   .tab:hover { color: #a0aab8; }
   .tab.active { color: #4fc3f7; border-color: #4fc3f7; }
 
@@ -55,7 +56,8 @@
   .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #4fc3f7; margin: 20px 0 12px; font-weight: 600; }
   .section-title:first-child { margin-top: 0; }
 
-  .param-card { background: #0f1218; border: 1px solid #1e222d; border-radius: 10px; padding: 16px; }
+  .param-card { background: #0f1218; border: 1px solid #1e222d; border-radius: 10px; padding: 16px; transition: border-color .2s; }
+  .param-card:hover { border-color: #2a4a5e; }
   .param-label { color: #6b7380; font-size: 0.82rem; margin-bottom: 6px; }
   .param-value { font-size: 1.25rem; font-weight: 600; color: #fff; }
   .param-unit { color: #6b7380; font-size: 0.85rem; margin-left: 4px; }
@@ -64,15 +66,61 @@
   .param-sm .param-value { font-size: 1.05rem; }
 
   .comment-box { background: #0f1218; border: 1px solid #1e222d; border-radius: 10px; padding: 14px; color: #8b95a8; font-size: 0.9rem; line-height: 1.6; }
-  .chart-wrap { background: #0f1218; border: 1px solid #1e222d; border-radius: 10px; padding: 16px; height: 260px; }
   .empty { text-align: center; color: #4a5568; padding: 60px 20px; }
 
-  .terrain-pill { display: inline-block; padding: 3px 10px; border-radius: 6px; background: #1e222d; margin: 2px; font-size: 0.8rem; color: #a0aab8; }
-  .terrain-pill.active { background: rgba(79, 195, 247, 0.12); color: #4fc3f7; }
+  .terrain-pill { display: inline-block; padding: 3px 10px; border-radius: 6px; background: #1e222d; margin: 2px; font-size: 0.8rem; color: #a0aab8; transition: background .2s; }
+  .terrain-pill:hover { background: rgba(79,195,247,0.12); color: #4fc3f7; }
 
+  /* Temp bar horizontal */
+  .temp-bar-wrap { display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto; padding: 6px 0 16px; }
+  .temp-bar-item {
+    flex: 1 1 0; min-width: 58px; text-align: center; cursor: default; transition: transform .15s;
+  }
+  .temp-bar-item:hover { transform: translateY(-4px); }
+  .temp-bar-month { font-size: 0.7rem; text-transform: uppercase; color: #6b7380; margin-bottom: 6px; letter-spacing: 0.04em; }
+  .temp-bar-value {
+    font-size: 1.05rem; font-weight: 600; color: #fff; padding: 10px 0; border-radius: 8px;
+    background: linear-gradient(180deg, rgba(79,195,247,0.18) 0%, rgba(79,195,247,0.05) 100%);
+    border: 1px solid rgba(79,195,247,0.15); position: relative;
+  }
+  .temp-bar-value::after {
+    content: '°C'; font-size: 0.65rem; color: #6b7380; margin-left: 1px; vertical-align: super;
+  }
+  .temp-bar-value.cold {
+    background: linear-gradient(180deg, rgba(79,195,247,0.25) 0%, rgba(79,195,247,0.06) 100%);
+    border-color: rgba(79,195,247,0.3); color: #7ee7ff;
+  }
+  .temp-bar-value.hot {
+    background: linear-gradient(180deg, rgba(255,171,64,0.2) 0%, rgba(255,171,64,0.05) 100%);
+    border-color: rgba(255,171,64,0.25); color: #ffab40;
+  }
+  .temp-bar-value.extreme {
+    background: linear-gradient(180deg, rgba(239,83,80,0.22) 0%, rgba(239,83,80,0.05) 100%);
+    border-color: rgba(239,83,80,0.28); color: #ef5350;
+  }
+
+  /* Canvas chart */
+  .chart-wrap { background: #0f1218; border: 1px solid #1e222d; border-radius: 14px; padding: 20px 24px; height: 340px; position: relative; }
+  .chart-canvas { width: 100% !important; height: 100% !important; }
+  #chartTooltip {
+    position: absolute; pointer-events: none; opacity: 0; transition: opacity .15s;
+    background: #1a1d26; border: 1px solid #2a4a5e; border-radius: 8px; padding: 8px 12px;
+    font-size: 0.82rem; color: #e0e6f0; box-shadow: 0 4px 16px rgba(0,0,0,0.3); z-index: 5;
+  }
+  #chartTooltip strong { color: #4fc3f7; }
+
+  .yearly-temp { display: inline-flex; align-items: baseline; gap: 4px; margin-top: 12px; }
+  .yearly-temp .label { color: #6b7380; font-size: 0.8rem; }
+  .yearly-temp .value { font-size: 1.2rem; font-weight: 600; color: #fff; }
+
+  @media (max-width: 700px) {
+    .temp-bar-wrap { gap: 3px; }
+    .temp-bar-item { min-width: 44px; }
+    .temp-bar-value { font-size: 0.85rem; padding: 8px 0; }
+    .chart-wrap { height: 260px; padding: 12px; }
+  }
   @media (max-width: 600px) {
-    .grid-2 { grid-template-columns: 1fr; }
-    .grid-3 { grid-template-columns: 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
     h1 { font-size: 1.4rem; }
   }
 </style>
@@ -98,10 +146,8 @@ let data = [];
 let current = null;
 
 async function load() {
-  try {
-    const res = await fetch(API);
-    data = await res.json();
-  } catch(e) { alert('Ошибка загрузки данных'); }
+  try { const res = await fetch(API); data = await res.json(); }
+  catch(e) { document.getElementById('content').innerHTML = '<div class="empty">Ошибка загрузки данных</div>'; }
 }
 
 const search = document.getElementById('search');
@@ -159,6 +205,15 @@ function pcard(label, value, unit, source, extraClass='') {
 
 function section(title) { return `<div class="section-title">${esc(title)}</div>`; }
 
+function tempClass(t) {
+  if (t === null || t === undefined) return '';
+  if (t <= -15) return 'extreme';
+  if (t <= -5) return 'cold';
+  if (t >= 20) return 'extreme';
+  if (t >= 15) return 'hot';
+  return '';
+}
+
 function renderCity(d) {
   const tabs = [
     {id:'loads', label:'Нагрузки'},
@@ -174,122 +229,83 @@ function renderCity(d) {
         <div class="city-name">${esc(d.settlement)}</div>
         <div class="city-meta">${esc(d.region)} · ${esc(d.settlementType)} · id: ${esc(d.id)}</div>
       </div>
-      <div>
-        <span class="status-badge ${statusClass(d.dataStatus)}">${esc(d.dataStatus)}</span>
-      </div>
+      <div><span class="status-badge ${statusClass(d.dataStatus)}">${esc(d.dataStatus)}</span></div>
     </div>`;
 
   html += `<div class="tabs">${tabs.map((t,i) => `<div class="tab ${i===0?'active':''}" data-tab="${t.id}">${esc(t.label)}</div>`).join('')}</div>`;
 
-  // Tab: loads
+  // Tab loads
   html += `<div class="tab-content active" data-tab="loads">
     ${section('Снеговая нагрузка (СП 20.13330.2016, карта 1)')}
     <div class="grid-2">${d.snow ? pcard('Снеговой район', d.snow.region, '', d.snow.source) + pcard('Нормативное значение Sg', d.snow.sgKpa, 'кПа', d.snow.source) : '<div class="empty">Нет данных</div>'}</div>
-
     ${section('Ветровая нагрузка (СП 20.13330.2016, карта 3)')}
     <div class="grid-2">${d.wind ? pcard('Ветровой район', d.wind.region, '', d.wind.source) + pcard('Нормативное значение w₀', d.wind.w0Kpa, 'кПа', d.wind.source) : '<div class="empty">Нет данных</div>'}</div>
-
     ${section('Гололёдная нагрузка (СП 20.13330.2016, карта 4)')}
     <div class="grid-2">${d.ice ? pcard('Гололёдный район', d.ice.region, '', d.ice.source) + pcard('Толщина гололёда b при h=10 м', d.ice.iceThicknessMm, 'мм', d.ice.source) : '<div class="empty">Нет данных</div>'}</div>
-
     ${section('Сейсмичность (СП 14.13330, ОСР-2015)')}
     <div class="grid-2">${d.seismic ? pcard('Баллы сейсмичности (карта A)', d.seismic.points, 'баллов', d.seismic.source) : '<div class="empty">Нет данных</div>'}</div>
-
     ${section('Тип местности (СП 20.13330.2016, табл. 11.2)')}
     <div class="grid-2"><div class="param-card"><div class="param-label">Допустимые типы</div><div>${(d.terrain?.allowedTypes||[]).map(t=>`<span class="terrain-pill">${esc(t)}</span>`).join('')||'—'}</div></div></div>
-
     ${d.comment ? section('Комментарий') + `<div class="comment-box">${esc(d.comment)}</div>` : ''}
   </div>`;
 
-  // Tab: cold
+  // Tab cold
   const cp = d.coldPeriod;
   html += `<div class="tab-content" data-tab="cold">
     ${cp ? `
     ${section('Температуры, °C')}
-    <div class="grid-3">
-      ${pcard('Т холодн. суток, обесп. 0.98', cp.tempColdestDay098, '°C')}
-      ${pcard('Т холодн. суток, обесп. 0.92', cp.tempColdestDay092, '°C')}
-      ${pcard('Т холодн. 5-дневки, обесп. 0.98', cp.tempColdest5days098, '°C')}
-      ${pcard('Т холодн. 5-дневки, обесп. 0.92', cp.tempColdest5days092, '°C')}
-      ${pcard('Т с обеспеч. 0.94', cp.temp094, '°C')}
-      ${pcard('Абсолютный минимум', cp.absMin, '°C')}
-      ${pcard('Средняя сут. амплитуда', cp.dailyAmplitude, '°C')}
-    </div>
+    <div class="grid-3">${pcard('Т холодн. суток, обесп. 0.98', cp.tempColdestDay098, '°C')}${pcard('Т холодн. суток, обесп. 0.92', cp.tempColdestDay092, '°C')}${pcard('Т холодн. 5-дневки, обесп. 0.98', cp.tempColdest5days098, '°C')}${pcard('Т холодн. 5-дневки, обесп. 0.92', cp.tempColdest5days092, '°C')}${pcard('Т с обеспеч. 0.94', cp.temp094, '°C')}${pcard('Абсолютный минимум', cp.absMin, '°C')}${pcard('Средняя сут. амплитуда', cp.dailyAmplitude, '°C')}</div>
     ${section('Периоды и средние температуры')}
-    <div class="grid-3">
-      ${pcard('Продолж. при Т ≤ 0 °C', cp.durationLe0, 'сут', '', 'param-sm')} ${pcard('Средняя Т при Т ≤ 0 °C', cp.meanLe0, '°C', '', 'param-sm')}
-      ${pcard('Отопит. период (Т ≤ 8 °C)', cp.durationLe8, 'сут', '', 'param-sm')} ${pcard('Средняя Т отоп. периода', cp.meanLe8, '°C', '', 'param-sm')}
-      ${pcard('Период при Т ≤ 10 °C', cp.durationLe10, 'сут', '', 'param-sm')} ${pcard('Средняя Т при Т ≤ 10 °C', cp.meanLe10, '°C', '', 'param-sm')}
-    </div>
+    <div class="grid-3">${pcard('Продолж. при Т ≤ 0 °C', cp.durationLe0, 'сут', '', 'param-sm')}${pcard('Средняя Т при Т ≤ 0 °C', cp.meanLe0, '°C', '', 'param-sm')}${pcard('Отопит. период (Т ≤ 8 °C)', cp.durationLe8, 'сут', '', 'param-sm')}${pcard('Средняя Т отоп. периода', cp.meanLe8, '°C', '', 'param-sm')}${pcard('Период при Т ≤ 10 °C', cp.durationLe10, 'сут', '', 'param-sm')}${pcard('Средняя Т при Т ≤ 10 °C', cp.meanLe10, '°C', '', 'param-sm')}</div>
     ${section('Влажность, ветер, осадки')}
-    <div class="grid-3">
-      ${pcard('Влажность холодн. мес.', cp.humidityCold, '%', '', 'param-sm')}
-      ${pcard('Влажность в 15:00', cp.humidityCold15, '%', '', 'param-sm')}
-      ${pcard('Осадки ноябрь—март', cp.precipNovMar, 'мм', '', 'param-sm')}
-      ${pcard('Преобл. ветер дек—фев', cp.prevailingWindDecFeb, '', '', 'param-sm')}
-      ${pcard('Макс. скорость ветра (янв)', cp.maxWindJan, 'м/с', '', 'param-sm')}
-      ${pcard('Средняя скорость при Т ≤ 8 °C', cp.meanWindLe8, 'м/с', '', 'param-sm')}
-    </div>
+    <div class="grid-3">${pcard('Влажность холодн. мес.', cp.humidityCold, '%', '', 'param-sm')}${pcard('Влажность в 15:00', cp.humidityCold15, '%', '', 'param-sm')}${pcard('Осадки ноябрь—март', cp.precipNovMar, 'мм', '', 'param-sm')}${pcard('Преобл. ветер дек—фев', cp.prevailingWindDecFeb, '', '', 'param-sm')}${pcard('Макс. скорость ветра (янв)', cp.maxWindJan, 'м/с', '', 'param-sm')}${pcard('Средняя скорость при Т ≤ 8 °C', cp.meanWindLe8, 'м/с', '', 'param-sm')}</div>
     <div class="param-source" style="padding:10px 0 0">Источник: ${esc(cp.source||'—')}</div>
     ` : '<div class="empty">Для этого города нет данных холодного периода</div>'}
   </div>`;
 
-  // Tab: warm
+  // Tab warm
   const wp = d.warmPeriod;
   html += `<div class="tab-content" data-tab="warm">
     ${wp ? `
     ${section('Температуры и давление')}
-    <div class="grid-3">
-      ${pcard('Барометрическое давление', wp.barometric, 'гПа')}
-      ${pcard('Т тёпл. мес., обесп. 0.95', wp.temp095, '°C')}
-      ${pcard('Т тёпл. мес., обесп. 0.99', wp.temp099, '°C')}
-      ${pcard('Средняя макс. Т тёпл. мес.', wp.meanMaxTempWarmMonth, '°C')}
-      ${pcard('Абсолютный максимум', wp.absMax, '°C')}
-      ${pcard('Средняя сут. амплитуда', wp.dailyAmplitude, '°C')}
-    </div>
+    <div class="grid-3">${pcard('Барометрическое давление', wp.barometric, 'гПа')}${pcard('Т тёпл. мес., обесп. 0.95', wp.temp095, '°C')}${pcard('Т тёпл. мес., обесп. 0.99', wp.temp099, '°C')}${pcard('Средняя макс. Т тёпл. мес.', wp.meanMaxTempWarmMonth, '°C')}${pcard('Абсолютный максимум', wp.absMax, '°C')}${pcard('Средняя сут. амплитуда', wp.dailyAmplitude, '°C')}</div>
     ${section('Влажность, осадки, ветер')}
-    <div class="grid-3">
-      ${pcard('Влажность тёпл. мес.', wp.humidityWarm, '%', '', 'param-sm')}
-      ${pcard('Влажность в 15:00', wp.humidityWarm15, '%', '', 'param-sm')}
-      ${pcard('Осадки апрель—октябрь', wp.precipAprOct, 'мм', '', 'param-sm')}
-      ${pcard('Макс. суточные осадки', wp.dailyMaxPrecip, 'мм', '', 'param-sm')}
-      ${pcard('Преобл. ветер июнь—авг', wp.prevailingWindJunAug, '', '', 'param-sm')}
-      ${pcard('Мин. скорость ветра (июль)', wp.minWindJul, 'м/с', '', 'param-sm')}
-    </div>
+    <div class="grid-3">${pcard('Влажность тёпл. мес.', wp.humidityWarm, '%', '', 'param-sm')}${pcard('Влажность в 15:00', wp.humidityWarm15, '%', '', 'param-sm')}${pcard('Осадки апрель—октябрь', wp.precipAprOct, 'мм', '', 'param-sm')}${pcard('Макс. суточные осадки', wp.dailyMaxPrecip, 'мм', '', 'param-sm')}${pcard('Преобл. ветер июнь—авг', wp.prevailingWindJunAug, '', '', 'param-sm')}${pcard('Мин. скорость ветра (июль)', wp.minWindJul, 'м/с', '', 'param-sm')}</div>
     <div class="param-source" style="padding:10px 0 0">Источник: ${esc(wp.source||'—')}</div>
     ` : '<div class="empty">Для этого города нет данных тёплого периода</div>'}
   </div>`;
 
-  // Tab: frost
+  // Tab frost
   const fr = d.frostDepth;
   html += `<div class="tab-content" data-tab="frost">
     ${fr ? `
     ${section('Глубина сезонного промерзания, м (СП 22.13330)')}
-    <div class="grid-2">
-      ${pcard('Суглинки и глины', fr.loamy, 'м')}
-      ${pcard('Супеси, пески мелкие/пылеватые', fr.sandyFine, 'м')}
-      ${pcard('Пески крупные и средней крупности', fr.sandyCoarse, 'м')}
-      ${pcard('Крупнообломочные грунты', fr.coarseFragmental, 'м')}
-    </div>
+    <div class="grid-2">${pcard('Суглинки и глины', fr.loamy, 'м')}${pcard('Супеси, пески мелкие/пылеватые', fr.sandyFine, 'м')}${pcard('Пески крупные и средней крупности', fr.sandyCoarse, 'м')}${pcard('Крупнообломочные грунты', fr.coarseFragmental, 'м')}</div>
     <div class="param-source" style="padding:10px 0 0">Источник: ${esc(fr.source||'—')}</div>
     ` : '<div class="empty">Для этого города нет данных по глубине промерзания</div>'}
   </div>`;
 
-  // Tab: chart
+  // Tab chart
   const mt = d.monthlyTemps;
   html += `<div class="tab-content" data-tab="chart">
     ${mt && mt.byMonth ? `
-    <div class="grid-2" style="align-items:start">
-      <div>
-        ${section('Среднемесячные температуры, °C')}
-        <div class="grid-3">
-          ${mt.byMonth.map((t,i)=>pcard(['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'][i], t, '°C', '', 'param-sm')).join('')}
-        </div>
-        ${pcard('Среднегодовая температура', mt.yearly, '°C')}
-      </div>
-      <div class="chart-wrap">
-        <canvas id="tempChart" width="400" height="220"></canvas>
-      </div>
+    ${section('Среднемесячные температуры, °C')}
+    <div class="temp-bar-wrap">
+      ${mt.byMonth.map((t,i) => {
+        const names = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+        const cls = tempClass(t);
+        return `<div class="temp-bar-item">
+          <div class="temp-bar-month">${names[i]}</div>
+          <div class="temp-bar-value ${cls}">${t===null||t===undefined?'—':esc(String(t))}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="yearly-temp"><span class="label">Среднегодовая: </span><span class="value">${mt.yearly}°C</span></div>
+
+    ${section('Сезонный график')}
+    <div class="chart-wrap">
+      <canvas id="tempChart" class="chart-canvas"></canvas>
+      <div id="chartTooltip"></div>
     </div>
     ` : '<div class="empty">Для этого города нет среднемесячных температур</div>'}
   </div>`;
@@ -297,76 +313,159 @@ function renderCity(d) {
   html += '</div>';
   content.innerHTML = html;
 
-  // Tabs logic
+  // Tabs
   document.querySelectorAll('.tab').forEach(t => {
     t.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
       t.classList.add('active');
       document.querySelector(`.tab-content[data-tab="${t.dataset.tab}"]`).classList.add('active');
-      if (t.dataset.tab==='chart' && mt && mt.byMonth) drawChart(mt.byMonth);
+      if (t.dataset.tab==='chart' && mt && mt.byMonth) setTimeout(()=>drawChart(mt.byMonth), 30);
     });
   });
 
-  if (mt && mt.byMonth) setTimeout(() => drawChart(mt.byMonth), 50);
+  if (mt && mt.byMonth) setTimeout(()=>drawChart(mt.byMonth), 50);
 }
 
 function drawChart(data) {
   const cvs = document.getElementById('tempChart');
   if (!cvs) return;
+  const wrap = cvs.parentElement;
+  const tip = document.getElementById('chartTooltip');
   const ctx = cvs.getContext('2d');
-  const dpr = window.devicePixelRatio||1;
-  const W = cvs.clientWidth, H = cvs.clientHeight;
-  cvs.width = W*dpr; cvs.height = H*dpr;
-  ctx.scale(dpr,dpr);
-  ctx.clearRect(0,0,W,H);
+  const dpr = window.devicePixelRatio || 1;
+  const W = wrap.clientWidth - 48;
+  const H = wrap.clientHeight - 40;
+  cvs.width = W * dpr;
+  cvs.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
 
   const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-  const pad = {top:20,right:15,bottom:30,left:35};
-  const w = W-pad.left-pad.right, h = H-pad.top-pad.bottom;
-  const min = Math.min(...data)-3, max = Math.max(...data)+3;
-  const range = max-min;
+  const pad = { top: 18, right: 22, bottom: 34, left: 42 };
+  const w = W - pad.left - pad.right;
+  const h = H - pad.top - pad.bottom;
+  const min = Math.min(...data) - 4;
+  const max = Math.max(...data) + 4;
+  const range = max - min;
+
+  // area gradient
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + h);
+  grad.addColorStop(0, 'rgba(79,195,247,0.35)');
+  grad.addColorStop(0.5, 'rgba(79,195,247,0.08)');
+  grad.addColorStop(1, 'rgba(79,195,247,0.01)');
 
   // grid
-  ctx.strokeStyle='#1e222d'; ctx.lineWidth=1;
-  for (let i=0;i<=5;i++) {
-    const y = pad.top+h*(i/5);
-    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+w,y); ctx.stroke();
-    ctx.fillStyle='#4a5568'; ctx.font='11px sans-serif'; ctx.textAlign='right';
-    ctx.fillText((max-range*(i/5)).toFixed(1), pad.left-6, y+4);
+  ctx.strokeStyle = '#1e222d';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const y = pad.top + h * (i / 5);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + w, y); ctx.stroke();
+    const val = max - range * (i / 5);
+    ctx.fillStyle = '#4a5568';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText((val > 0 ? '+' : '') + val.toFixed(1) + '°', pad.left - 8, y);
   }
 
-  // line
-  const step = w/11;
-  ctx.strokeStyle='#4fc3f7'; ctx.lineWidth=2; ctx.lineJoin='round'; ctx.lineCap='round';
+  const step = w / 11;
+  const points = data.map((v, i) => ({
+    x: pad.left + i * step,
+    y: pad.top + h - (v - min) / range * h,
+    val: v,
+    name: months[i]
+  }));
+
+  // filled area
   ctx.beginPath();
-  data.forEach((v,i)=> {
-    const x = pad.left+i*step;
-    const y = pad.top+h-(v-min)/range*h;
-    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  points.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+  ctx.lineTo(pad.left + w, pad.top + h);
+  ctx.lineTo(pad.left, pad.top + h);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // zero line
+  if (max > 0 && min < 0) {
+    const y0 = pad.top + h - (0 - min) / range * h;
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.beginPath(); ctx.moveTo(pad.left, y0); ctx.lineTo(pad.left + w, y0); ctx.stroke();
+  }
+
+  // smooth curve
+  ctx.strokeStyle = '#4fc3f7';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  points.forEach((p, i) => {
+    if (i === 0) ctx.moveTo(p.x, p.y);
+    else {
+      const prev = points[i-1];
+      const cp1x = prev.x + (p.x - prev.x) * 0.5;
+      const cp1y = prev.y;
+      const cp2x = prev.x + (p.x - prev.x) * 0.5;
+      const cp2y = p.y;
+      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p.x, p.y);
+    }
   });
   ctx.stroke();
 
-  // fill
+  // glow
+  ctx.strokeStyle = 'rgba(79,195,247,0.35)';
+  ctx.lineWidth = 8;
   ctx.beginPath();
-  data.forEach((v,i)=> {
-    const x = pad.left+i*step; const y = pad.top+h-(v-min)/range*h;
-    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  points.forEach((p, i) => {
+    if (i === 0) ctx.moveTo(p.x, p.y);
+    else { const prev = points[i-1]; const mx = (prev.x+p.x)/2; ctx.quadraticCurveTo(mx, prev.y, mx, (prev.y+p.y)/2); ctx.quadraticCurveTo(mx, p.y, p.x, p.y); }
   });
-  ctx.lineTo(pad.left+w, pad.top+h); ctx.lineTo(pad.left, pad.top+h); ctx.closePath();
-  ctx.fillStyle='rgba(79,195,247,0.08)'; ctx.fill();
+  ctx.stroke();
 
   // points
-  data.forEach((v,i)=> {
-    const x = pad.left+i*step; const y = pad.top+h-(v-min)/range*h;
-    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle='#4fc3f7'; ctx.fill();
+  points.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#0b0d10';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = p.val > 15 ? '#ffab40' : p.val < -5 ? '#4fc3f7' : '#66bb6a';
+    ctx.stroke();
   });
 
-  // labels
-  ctx.fillStyle='#6b7380'; ctx.font='11px sans-serif'; ctx.textAlign='center';
-  data.forEach((v,i)=> {
-    ctx.fillText(months[i], pad.left+i*step, H-8);
+  // month labels
+  ctx.fillStyle = '#6b7380';
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  points.forEach(p => {
+    ctx.fillText(p.name, p.x, pad.top + h + 8);
   });
+
+  // tooltip interaction
+  cvs.onmousemove = e => {
+    const rect = cvs.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    let nearest = null;
+    let nd = Infinity;
+    points.forEach(p => {
+      const d = Math.hypot(p.x - mx, p.y - my);
+      if (d < 28 && d < nd) { nd = d; nearest = p; }
+    });
+    if (nearest) {
+      tip.innerHTML = `<strong>${nearest.name}</strong><br>${nearest.val > 0 ? '+' : ''}${nearest.val} °C`;
+      tip.style.opacity = '1';
+      tip.style.left = (nearest.x + 8) + 'px';
+      tip.style.top = (nearest.y - 40) + 'px';
+    } else {
+      tip.style.opacity = '0';
+    }
+  };
+  cvs.onmouseleave = () => { tip.style.opacity = '0'; };
+  cvs.onclick = () => { tip.style.opacity = '0'; };
 }
 
 load();
