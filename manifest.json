@@ -1,0 +1,13 @@
+{
+  "name": "Климатический атлас СП",
+  "short_name": "Климат СП",
+  "description": "Климатические данные для расчётов по СП 20, СП 131, СП 22, СП 14",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

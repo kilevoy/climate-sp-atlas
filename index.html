@@ -4,91 +4,161 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Климатические данные | СП 20, СП 131, СП 22</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0d10">
 <style>
+  :root {
+    --bg: #0b0d10;
+    --fg: #d4d8e0;
+    --card: #14171f;
+    --card-border: #1e222d;
+    --card-header-bg: #0f1218;
+    --input-bg: #14171f;
+    --input-border: #2a2e3a;
+    --input-fg: #e0e6f0;
+    --suggest-bg: #1a1d26;
+    --suggest-hover: #242836;
+    --muted: #6b7380;
+    --accent: #4fc3f7;
+    --accent-rgb: 79,195,247;
+    --warn: #ffc107;
+    --danger: #f44336;
+    --success: #4caf50;
+    --param-bg: #0f1218;
+    --chart-zero: rgba(255,255,255,0.08);
+    --chart-area-1: rgba(79,195,247,0.35);
+    --chart-area-5: rgba(79,195,247,0.01);
+    --footer: #4a5568;
+    --pill-bg: #1e222d;
+    --pill-hover-bg: rgba(79,195,247,0.12);
+    --tooltip-bg: #1a1d26;
+    --tooltip-border: #2a4a5e;
+    --shadow: rgba(0,0,0,0.4);
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f6f9;
+    --fg: #1a1d26;
+    --card: #ffffff;
+    --card-border: #d0d7e2;
+    --card-header-bg: #eef1f5;
+    --input-bg: #ffffff;
+    --input-border: #c8cfda;
+    --input-fg: #1a1d26;
+    --suggest-bg: #ffffff;
+    --suggest-hover: #eef1f5;
+    --muted: #6b7280;
+    --accent: #0284c7;
+    --accent-rgb: 2,132,199;
+    --warn: #b45309;
+    --danger: #dc2626;
+    --success: #16a34a;
+    --param-bg: #f8fafc;
+    --chart-zero: rgba(0,0,0,0.06);
+    --chart-area-1: rgba(2,132,199,0.22);
+    --chart-area-5: rgba(2,132,199,0.02);
+    --footer: #6b7280;
+    --pill-bg: #e2e8f0;
+    --pill-hover-bg: rgba(2,132,199,0.1);
+    --tooltip-bg: #ffffff;
+    --tooltip-border: #c8cfda;
+    --shadow: rgba(0,0,0,0.08);
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0b0d10;
-    color: #d4d8e0;
+    background: var(--bg);
+    color: var(--fg);
     line-height: 1.5;
     min-height: 100vh;
+    transition: background .3s, color .3s;
   }
   .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
-  header { text-align: center; margin-bottom: 30px; }
-  h1 { font-size: 1.8rem; color: #4fc3f7; font-weight: 600; }
-  .subtitle { color: #6b7380; font-size: 0.9rem; margin-top: 6px; }
+  header { text-align: center; margin-bottom: 30px; position: relative; }
+  h1 { font-size: 1.8rem; color: var(--accent); font-weight: 600; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
+
+  .theme-toggle {
+    position: absolute; right: 0; top: 0;
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 10px;
+    padding: 8px 14px; cursor: pointer; font-size: 0.85rem; color: var(--muted);
+    display: flex; align-items: center; gap: 6px; transition: border-color .2s, color .2s;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  @media (max-width: 600px) {
+    .theme-toggle { position: static; margin: 0 auto 16px; width: fit-content; }
+    header { padding-top: 10px; }
+  }
 
   .search-wrap { position: relative; max-width: 500px; margin: 0 auto 30px; }
-  #search { width: 100%; padding: 14px 18px; border: 1px solid #2a2e3a; border-radius: 10px; background: #14171f; color: #e0e6f0; font-size: 1rem; }
-  #search:focus { outline: none; border-color: #4fc3f7; }
+  #search { width: 100%; padding: 14px 18px; border: 1px solid var(--input-border); border-radius: 10px; background: var(--input-bg); color: var(--input-fg); font-size: 1rem; transition: border-color .2s; }
+  #search:focus { outline: none; border-color: var(--accent); }
   #suggestions {
     position: absolute; top: calc(100% + 4px); left: 0; right: 0; max-height: 260px; overflow-y: auto;
-    background: #1a1d26; border: 1px solid #2a2e3a; border-radius: 10px; z-index: 10;
-    display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    background: var(--suggest-bg); border: 1px solid var(--input-border); border-radius: 10px; z-index: 10;
+    display: none; box-shadow: 0 8px 24px var(--shadow);
   }
-  .sug-item { padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #242836; }
+  .sug-item { padding: 10px 16px; cursor: pointer; border-bottom: 1px solid var(--card-border); transition: background .15s; }
   .sug-item:last-child { border-bottom: none; }
-  .sug-item:hover, .sug-item.active { background: #242836; }
-  .sug-name { color: #e0e6f0; font-weight: 500; }
-  .sug-region { color: #6b7380; font-size: 0.8rem; }
+  .sug-item:hover, .sug-item.active { background: var(--suggest-hover); }
+  .sug-name { color: var(--input-fg); font-weight: 500; }
+  .sug-region { color: var(--muted); font-size: 0.8rem; }
 
-  .card { background: #14171f; border: 1px solid #1e222d; border-radius: 14px; overflow: hidden; }
-  .card-header { padding: 22px 24px; border-bottom: 1px solid #1e222d; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-  .city-name { font-size: 1.4rem; font-weight: 600; color: #fff; }
-  .city-meta { color: #6b7380; font-size: 0.85rem; margin-top: 4px; }
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; overflow: hidden; transition: background .3s, border-color .3s; }
+  .card-header { padding: 22px 24px; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .city-name { font-size: 1.4rem; font-weight: 600; color: var(--fg); }
+  .city-meta { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
   .status-badge {
     display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
   }
-  .status-verified { background: rgba(76, 175, 80, 0.15); color: #4caf50; }
-  .status-partial { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
-  .status-requires_verification { background: rgba(244, 67, 54, 0.15); color: #f44336; }
+  .status-verified { background: rgba(76, 175, 80, 0.15); color: var(--success); }
+  :root[data-theme="light"] .status-verified { background: rgba(22,163,74,0.12); }
+  .status-partial { background: rgba(255, 193, 7, 0.15); color: var(--warn); }
+  :root[data-theme="light"] .status-partial { background: rgba(180,83,9,0.1); }
+  .status-requires_verification { background: rgba(244, 67, 54, 0.15); color: var(--danger); }
+  :root[data-theme="light"] .status-requires_verification { background: rgba(220,38,38,0.1); }
 
-  .tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid #1e222d; background: #0f1218; overflow-x: auto; }
-  .tab { padding: 12px 16px; cursor: pointer; font-size: 0.88rem; color: #6b7380; border-bottom: 2px solid transparent; white-space: nowrap; transition: color .2s; }
-  .tab:hover { color: #a0aab8; }
-  .tab.active { color: #4fc3f7; border-color: #4fc3f7; }
+  .tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--card-border); background: var(--card-header-bg); overflow-x: auto; }
+  .tab { padding: 12px 16px; cursor: pointer; font-size: 0.88rem; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; transition: color .2s; }
+  .tab:hover { color: var(--fg); }
+  .tab.active { color: var(--accent); border-color: var(--accent); }
 
   .tab-content { display: none; padding: 22px 24px; }
   .tab-content.active { display: block; }
 
   .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
   .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
-  .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #4fc3f7; margin: 20px 0 12px; font-weight: 600; }
+  .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin: 20px 0 12px; font-weight: 600; }
   .section-title:first-child { margin-top: 0; }
 
-  .param-card { background: #0f1218; border: 1px solid #1e222d; border-radius: 10px; padding: 16px; transition: border-color .2s; }
-  .param-card:hover { border-color: #2a4a5e; }
-  .param-label { color: #6b7380; font-size: 0.82rem; margin-bottom: 6px; }
-  .param-value { font-size: 1.25rem; font-weight: 600; color: #fff; }
-  .param-unit { color: #6b7380; font-size: 0.85rem; margin-left: 4px; }
-  .param-source { color: #4a5568; font-size: 0.72rem; margin-top: 8px; word-break: break-all; }
+  .param-card { background: var(--param-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 16px; transition: border-color .2s; }
+  .param-card:hover { border-color: var(--accent); }
+  .param-label { color: var(--muted); font-size: 0.82rem; margin-bottom: 6px; }
+  .param-value { font-size: 1.25rem; font-weight: 600; color: var(--fg); }
+  .param-unit { color: var(--muted); font-size: 0.85rem; margin-left: 4px; }
+  .param-source { color: var(--muted); font-size: 0.72rem; margin-top: 8px; word-break: break-all; }
 
   .param-sm .param-value { font-size: 1.05rem; }
 
-  .comment-box { background: #0f1218; border: 1px solid #1e222d; border-radius: 10px; padding: 14px; color: #8b95a8; font-size: 0.9rem; line-height: 1.6; }
-  .empty { text-align: center; color: #4a5568; padding: 60px 20px; }
+  .comment-box { background: var(--param-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px; color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+  .empty { text-align: center; color: var(--muted); padding: 60px 20px; }
 
-  .terrain-pill { display: inline-block; padding: 3px 10px; border-radius: 6px; background: #1e222d; margin: 2px; font-size: 0.8rem; color: #a0aab8; transition: background .2s; }
-  .terrain-pill:hover { background: rgba(79,195,247,0.12); color: #4fc3f7; }
+  .terrain-pill { display: inline-block; padding: 3px 10px; border-radius: 6px; background: var(--pill-bg); margin: 2px; font-size: 0.8rem; color: var(--muted); transition: background .2s, color .2s; }
+  .terrain-pill:hover { background: var(--pill-hover-bg); color: var(--accent); }
 
   /* Temp bar horizontal */
   .temp-bar-wrap { display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto; padding: 6px 0 16px; }
-  .temp-bar-item {
-    flex: 1 1 0; min-width: 58px; text-align: center; cursor: default; transition: transform .15s;
-  }
+  .temp-bar-item { flex: 1 1 0; min-width: 58px; text-align: center; cursor: default; transition: transform .15s; }
   .temp-bar-item:hover { transform: translateY(-4px); }
-  .temp-bar-month { font-size: 0.7rem; text-transform: uppercase; color: #6b7380; margin-bottom: 6px; letter-spacing: 0.04em; }
+  .temp-bar-month { font-size: 0.7rem; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em; }
   .temp-bar-value {
-    font-size: 1.05rem; font-weight: 600; color: #fff; padding: 10px 0; border-radius: 8px;
-    background: linear-gradient(180deg, rgba(79,195,247,0.18) 0%, rgba(79,195,247,0.05) 100%);
-    border: 1px solid rgba(79,195,247,0.15); position: relative;
+    font-size: 1.05rem; font-weight: 600; color: var(--fg); padding: 10px 0; border-radius: 8px;
+    background: linear-gradient(180deg, rgba(var(--accent-rgb),0.18) 0%, rgba(var(--accent-rgb),0.05) 100%);
+    border: 1px solid rgba(var(--accent-rgb),0.15); position: relative;
   }
-  .temp-bar-value::after {
-    content: '°C'; font-size: 0.65rem; color: #6b7380; margin-left: 1px; vertical-align: super;
-  }
+  .temp-bar-value::after { content: '°C'; font-size: 0.65rem; color: var(--muted); margin-left: 1px; vertical-align: super; }
   .temp-bar-value.cold {
-    background: linear-gradient(180deg, rgba(79,195,247,0.25) 0%, rgba(79,195,247,0.06) 100%);
-    border-color: rgba(79,195,247,0.3); color: #7ee7ff;
+    background: linear-gradient(180deg, rgba(var(--accent-rgb),0.25) 0%, rgba(var(--accent-rgb),0.06) 100%);
+    border-color: rgba(var(--accent-rgb),0.3); color: var(--accent);
   }
   .temp-bar-value.hot {
     background: linear-gradient(180deg, rgba(255,171,64,0.2) 0%, rgba(255,171,64,0.05) 100%);
@@ -100,18 +170,21 @@
   }
 
   /* Canvas chart */
-  .chart-wrap { background: #0f1218; border: 1px solid #1e222d; border-radius: 14px; padding: 20px 24px; height: 340px; position: relative; }
+  .chart-wrap { background: var(--param-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px 24px; height: 340px; position: relative; }
   .chart-canvas { width: 100% !important; height: 100% !important; }
   #chartTooltip {
     position: absolute; pointer-events: none; opacity: 0; transition: opacity .15s;
-    background: #1a1d26; border: 1px solid #2a4a5e; border-radius: 8px; padding: 8px 12px;
-    font-size: 0.82rem; color: #e0e6f0; box-shadow: 0 4px 16px rgba(0,0,0,0.3); z-index: 5;
+    background: var(--tooltip-bg); border: 1px solid var(--tooltip-border); border-radius: 8px; padding: 8px 12px;
+    font-size: 0.82rem; color: var(--input-fg); box-shadow: 0 4px 16px var(--shadow); z-index: 5;
   }
-  #chartTooltip strong { color: #4fc3f7; }
+  #chartTooltip strong { color: var(--accent); }
 
   .yearly-temp { display: inline-flex; align-items: baseline; gap: 4px; margin-top: 12px; }
-  .yearly-temp .label { color: #6b7380; font-size: 0.8rem; }
-  .yearly-temp .value { font-size: 1.2rem; font-weight: 600; color: #fff; }
+  .yearly-temp .label { color: var(--muted); font-size: 0.8rem; }
+  .yearly-temp .value { font-size: 1.2rem; font-weight: 600; color: var(--fg); }
+
+  footer { text-align: center; padding: 40px 0 20px; color: var(--footer); font-size: 0.82rem; }
+  footer a { color: var(--accent); text-decoration: none; }
 
   @media (max-width: 700px) {
     .temp-bar-wrap { gap: 3px; }
@@ -128,6 +201,10 @@
 <body>
 <div class="container">
   <header>
+    <button class="theme-toggle" id="themeBtn" title="Переключить тему" aria-label="Переключить тему">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <span id="themeLabel">Тёмная</span>
+    </button>
     <h1>Климатические данные</h1>
     <div class="subtitle">СП 20.13330.2016 · СП 131.13330 · СП 22.13330 · СП 14.13330</div>
   </header>
@@ -139,8 +216,8 @@
 
   <div id="content"></div>
 
-  <footer style="text-align:center;padding:40px 0 20px;color:#4a5568;font-size:0.82rem;">
-    Разработано <a href="https://github.com/kilevoy" target="_blank" style="color:#4fc3f7;text-decoration:none;">@Рыкунов А.Н.</a>
+  <footer>
+    Разработано <a href="https://github.com/kilevoy" target="_blank">@Рыкунов А.Н.</a>
   </footer>
 </div>
 
@@ -148,6 +225,25 @@
 const API = 'settlements-climate.json';
 let data = [];
 let current = null;
+let isLight = false;
+
+function applyTheme() {
+  const root = document.documentElement;
+  isLight = localStorage.getItem('theme') === 'light';
+  if (isLight) root.setAttribute('data-theme', 'light');
+  else root.removeAttribute('data-theme');
+  document.getElementById('themeLabel').textContent = isLight ? 'Светлая' : 'Тёмная';
+  // redraw chart if visible
+  if (current && current.monthlyTemps && document.getElementById('tempChart')) {
+    drawChart(current.monthlyTemps.byMonth);
+  }
+}
+
+document.getElementById('themeBtn').addEventListener('click', () => {
+  localStorage.setItem('theme', isLight ? 'dark' : 'light');
+  applyTheme();
+});
+applyTheme();
 
 async function load() {
   try { const res = await fetch(API); data = await res.json(); }
@@ -331,6 +427,10 @@ function renderCity(d) {
   if (mt && mt.byMonth) setTimeout(()=>drawChart(mt.byMonth), 50);
 }
 
+function getCssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
 function drawChart(data) {
   const cvs = document.getElementById('tempChart');
   if (!cvs) return;
@@ -345,6 +445,13 @@ function drawChart(data) {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, W, H);
 
+  const accent = getCssVar('--accent');
+  const muted = getCssVar('--muted');
+  const gridColor = getCssVar('--card-border');
+  const zeroLine = getCssVar('--chart-zero');
+  const chartTop = getCssVar('--chart-area-1');
+  const chartBot = getCssVar('--chart-area-5');
+
   const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
   const pad = { top: 18, right: 22, bottom: 34, left: 42 };
   const w = W - pad.left - pad.right;
@@ -355,18 +462,18 @@ function drawChart(data) {
 
   // area gradient
   const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + h);
-  grad.addColorStop(0, 'rgba(79,195,247,0.35)');
-  grad.addColorStop(0.5, 'rgba(79,195,247,0.08)');
-  grad.addColorStop(1, 'rgba(79,195,247,0.01)');
+  grad.addColorStop(0, chartTop);
+  grad.addColorStop(0.5, chartTop.replace(/[\d.]+\)$/, '0.08)'));
+  grad.addColorStop(1, chartBot);
 
   // grid
-  ctx.strokeStyle = '#1e222d';
+  ctx.strokeStyle = gridColor;
   ctx.lineWidth = 1;
   for (let i = 0; i <= 5; i++) {
     const y = pad.top + h * (i / 5);
     ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + w, y); ctx.stroke();
     const val = max - range * (i / 5);
-    ctx.fillStyle = '#4a5568';
+    ctx.fillStyle = muted;
     ctx.font = '11px sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
@@ -393,12 +500,12 @@ function drawChart(data) {
   // zero line
   if (max > 0 && min < 0) {
     const y0 = pad.top + h - (0 - min) / range * h;
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.strokeStyle = zeroLine;
     ctx.beginPath(); ctx.moveTo(pad.left, y0); ctx.lineTo(pad.left + w, y0); ctx.stroke();
   }
 
   // smooth curve
-  ctx.strokeStyle = '#4fc3f7';
+  ctx.strokeStyle = accent;
   ctx.lineWidth = 2.5;
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
@@ -417,7 +524,7 @@ function drawChart(data) {
   ctx.stroke();
 
   // glow
-  ctx.strokeStyle = 'rgba(79,195,247,0.35)';
+  ctx.strokeStyle = accent.replace(')', ',0.35)').replace('rgb', 'rgba');
   ctx.lineWidth = 8;
   ctx.beginPath();
   points.forEach((p, i) => {
@@ -430,17 +537,17 @@ function drawChart(data) {
   points.forEach(p => {
     ctx.beginPath();
     ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#0b0d10';
+    ctx.fillStyle = getCssVar('--bg');
     ctx.fill();
     ctx.beginPath();
     ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
     ctx.lineWidth = 2;
-    ctx.strokeStyle = p.val > 15 ? '#ffab40' : p.val < -5 ? '#4fc3f7' : '#66bb6a';
+    ctx.strokeStyle = p.val > 15 ? '#ffab40' : p.val < -5 ? accent : '#66bb6a';
     ctx.stroke();
   });
 
   // month labels
-  ctx.fillStyle = '#6b7380';
+  ctx.fillStyle = muted;
   ctx.font = '11px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
@@ -473,6 +580,10 @@ function drawChart(data) {
 }
 
 load();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>
